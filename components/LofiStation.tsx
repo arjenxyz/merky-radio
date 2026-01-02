@@ -40,7 +40,7 @@ export default function LofiStation() {
   // STATE MANAGEMENT
   // ---------------------------------------------------------
 
-  // Data States (Server/API Data)
+  // Data States
   const [tracks, setTracks] = useState<Track[]>([]);
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +50,7 @@ export default function LofiStation() {
   const [isDayMode, setIsDayMode] = useState(false);
   const [progress, setProgress] = useState(0);
   
-  // App Configuration & UI States
+  // App Configuration
   const [appSettings, setAppSettings] = useState<AppSettings>({
     hideElements: true, 
     showTitles: true, 
@@ -59,29 +59,28 @@ export default function LofiStation() {
     hideTime: 5
   });
   const [showControls, setShowControls] = useState(() => !appSettings.hideElements);
-  const [scale, setScale] = useState(1); // For background aspect ratio handling
+  const [scale, setScale] = useState(1);
 
-  // Indices (Current Playback & Scene)
+  // Indices
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
 
-  // Modal Visibility States
+  // Modal States
   const [isSceneMenuOpen, setIsSceneMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const [isDevOpen, setIsDevOpen] = useState(false);
   
-  // Welcome Modal Logic (Check LocalStorage)
+  // Welcome Logic
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(() => {
     if (typeof window !== 'undefined') {
-      const hasVisited = localStorage.getItem('merky_visited');
-      return !hasVisited;
+      return !localStorage.getItem('merky_visited');
     }
     return false;
   });
 
-  // Audio Volume States
+  // Audio Volume
   const [masterVolume, setMasterVolume] = useState(0.8);
   const [musicVolume, setMusicVolume] = useState(0.5);
 
@@ -92,7 +91,6 @@ export default function LofiStation() {
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   
-  // Fallback data to prevent crashes if arrays are empty
   const currentTrack = tracks.length > 0 ? tracks[currentTrackIndex] : { 
       title: 'Loading System...', 
       artist: 'Merky OS', 
@@ -113,10 +111,12 @@ export default function LofiStation() {
   // ---------------------------------------------------------
 
   useEffect(() => {
+    let isMounted = true; 
+
     async function initData() {
       try {
         setIsLoading(true);
-        // Fetch data from internal API proxy to avoid exposing backend logic
+        // Fetch data from internal API proxy (Supabase)
         const response = await fetch('/api/lofi', {
             method: 'GET',
             cache: 'no-store'
@@ -128,55 +128,58 @@ export default function LofiStation() {
 
         if (!result.success) throw new Error(result.error || 'API Failed');
 
-        // Set Tracks
-        if (result.tracks) setTracks(result.tracks);
-        
-        // Format and Set Scenes
-        if (result.scenes) {
-            const formattedScenes = result.scenes.map((s: {
-                id: string;
-                name: string;
-                bg_day: string;
-                bg_night: string;
-                theme_color: string;
-            }): Scene => ({
-                id: s.id,
-                name: s.name,
-                bgDay: s.bg_day,     
-                bgNight: s.bg_night, 
-                themeColor: s.theme_color 
-            }));
-            setScenes(formattedScenes);
+        if (isMounted) {
+            if (result.tracks) setTracks(result.tracks);
+            if (result.scenes) {
+                const formattedScenes = result.scenes.map((s: {
+                    id: string;
+                    name: string;
+                    bg_day: string;
+                    bg_night: string;
+                    theme_color: string;
+                }) => ({
+                    id: s.id,
+                    name: s.name,
+                    bgDay: s.bg_day,     
+                    bgNight: s.bg_night, 
+                    themeColor: s.theme_color 
+                }));
+                setScenes(formattedScenes);
+            }
         }
 
       } catch (error) {
         console.error('Data Fetch Error:', error);
       } finally {
-        setIsLoading(false);
+        // --- YAPAY GECİKME (ARTIFICIAL DELAY) ---
+        // Veri gelse bile 2.5 saniye bekle (Senin istediğin özellik)
+        if (isMounted) {
+            setTimeout(() => {
+               setIsLoading(false);
+            }, 2500); 
+        }
       }
     }
 
     initData();
+    return () => { isMounted = false; };
   }, []);
 
   // ---------------------------------------------------------
   // SIDE EFFECTS (LOGIC)
   // ---------------------------------------------------------
 
-  // Persist "Visited" state
   useEffect(() => {
     if (isWelcomeOpen && typeof window !== 'undefined') {
       localStorage.setItem('merky_visited', 'true');
     }
   }, [isWelcomeOpen]);
 
-  // Window Resize Handler (Maintains 16:9 Aspect Ratio for Background)
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
       const targetRatio = 1920 / 1080;
-      // Calculate scale to cover the screen without distortion
       const newScale = (width / height > targetRatio) ? width / 1920 : height / 1080;
       setScale(newScale);
     };
@@ -185,16 +188,13 @@ export default function LofiStation() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Sync Volume State with Audio Element
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = musicVolume * masterVolume;
   }, [musicVolume, masterVolume]);
 
-  // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!appSettings.shortcuts) return;
-      // Disable shortcuts if any modal is open
       if (isSettingsOpen || isWelcomeOpen || isVolumeOpen || isInfoOpen || isDevOpen) return;
       
       if (e.code === 'Space') { 
@@ -209,7 +209,6 @@ export default function LofiStation() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [appSettings.shortcuts, isSettingsOpen, isWelcomeOpen, isVolumeOpen, isInfoOpen, isDevOpen]);
 
-  // Auto-Hide UI Logic
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     const handleMouseMove = () => {
@@ -218,7 +217,6 @@ export default function LofiStation() {
         clearTimeout(hideTimeoutRef.current);
         hideTimeoutRef.current = null;
       }
-      // Only hide if settings allow and no modal/menu is open
       if (appSettings.hideElements && !isSceneMenuOpen && !isSettingsOpen && !isWelcomeOpen && !isVolumeOpen && !isInfoOpen && !isDevOpen) {
         hideTimeoutRef.current = setTimeout(() => {
           setShowControls(false);
@@ -248,7 +246,6 @@ export default function LofiStation() {
     if (tracks.length === 0) return;
     let newIndex = currentTrackIndex + (direction === 'next' ? 1 : -1);
     
-    // Loop logic
     if (newIndex >= tracks.length) newIndex = 0;
     if (newIndex < 0) newIndex = tracks.length - 1;
     
@@ -262,16 +259,13 @@ export default function LofiStation() {
     }
   }, []);
 
-  // Handle Audio Source Change
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Reset and load new source
     audio.pause();
     audio.load();
 
-    // Auto-play if state is playing
     if (isPlaying) {
       const playPromise = audio.play();
       if (playPromise !== undefined) {
@@ -282,7 +276,6 @@ export default function LofiStation() {
     }
   }, [currentTrackIndex]);
 
-  // Handle Play/Pause Toggle
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -308,15 +301,22 @@ export default function LofiStation() {
   // RENDER
   // ---------------------------------------------------------
 
+  // --- 1. LOADING SCREEN (Original Simple Design) ---
   if (isLoading) {
       return (
-          <div className="h-screen w-full bg-black flex flex-col items-center justify-center text-white space-y-4">
+          <div className="h-screen w-full bg-black flex flex-col items-center justify-center text-white space-y-4 z-[9999] select-none">
+              {/* Sade Turuncu Spinner */}
               <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"></div>
-              <p className="font-mono text-sm tracking-widest animate-pulse">CONNECTING TO MERKY CLOUD...</p>
+              
+              {/* Sade Yanıp Sönen Metin */}
+              <p className="font-mono text-sm tracking-widest animate-pulse">
+                CONNECTING TO MERKY CLOUD...
+              </p>
           </div>
       );
   }
 
+  // --- 2. MAIN APP INTERFACE ---
   return (
     <div 
       ref={containerRef}
@@ -324,7 +324,7 @@ export default function LofiStation() {
       style={{ backgroundColor: '#000000' }}
     >
       
-      {/* LAYER 0: BACKGROUND (Scaled to fit) */}
+      {/* BACKGROUND */}
       <div className="absolute top-1/2 left-1/2 origin-center pointer-events-none"
         style={{ width: '1920px', height: '1080px', transform: `translate(-50%, -50%) scale(${scale})` }}
       >
@@ -335,7 +335,7 @@ export default function LofiStation() {
         />
       </div>
 
-      {/* LAYER 1: ALWAYS VISIBLE ELEMENTS & MODALS */}
+      {/* OVERLAYS & MODALS */}
       {appSettings.showClock && <DigitalClock />}
       
       <SettingsModal 
@@ -356,18 +356,16 @@ export default function LofiStation() {
           musicVolume={musicVolume} setMusicVolume={setMusicVolume}
       />
 
-      {/* LAYER 2: INTERACTIVE UI (Controls, Menus) */}
+      {/* CONTROLS & INTERACTIVE UI */}
       <div className={`absolute inset-0 z-50 transition-opacity duration-700 ${showControls ? 'opacity-100' : 'opacity-0'} pointer-events-none`}>
           
           <div 
              className={`absolute inset-0 ${isSceneMenuOpen || isVolumeOpen || isDevOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
              onClick={(e) => {
-                // Click outside logic for specific modals
                 if (isSceneMenuOpen && e.target === e.currentTarget) setIsSceneMenuOpen(false);
                 if (isVolumeOpen && !((e.target as Element).closest('.volume-modal'))) setIsVolumeOpen(false);
              }}
           >
-              {/* Center Song Info Overlay */}
               {appSettings.showTitles && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="pointer-events-auto">
@@ -376,7 +374,6 @@ export default function LofiStation() {
                 </div>
               )}
 
-              {/* Scene Selection Menu */}
               <div className="pointer-events-auto">
                   <SceneMenu 
                     scenes={scenes}
@@ -387,7 +384,6 @@ export default function LofiStation() {
                   />
               </div>
 
-              {/* Bottom Control Bar */}
               <div className="absolute bottom-0 left-0 w-full pointer-events-auto">
                   <ControlBar 
                     currentTrack={currentTrack}
@@ -411,7 +407,7 @@ export default function LofiStation() {
           </div>
       </div>
 
-      {/* HIDDEN AUDIO ELEMENT (Logic Core) */}
+      {/* HIDDEN AUDIO ELEMENT */}
       <audio 
         ref={audioRef}
         src={currentTrack?.url || ''}
