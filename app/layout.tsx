@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 /* -------------------------------------------------------------------------- */
 export const metadata: Metadata = {
   title: "Merky Radio",
-  description: "Created by Arjen.",
+  description: "Merky Art Hive Radio | Created by Arjen",
 };
 
 /* -------------------------------------------------------------------------- */
