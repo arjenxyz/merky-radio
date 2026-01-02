@@ -2,9 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Buradaki @apply kurallarını ve body bloğunu tamamen siliyoruz */
+/* ==========================================================================
+  Animations
+  ========================================================================== */
 
-/* Animasyonlar kalabilir */
+/* Shimmer animation for loading skeletons or highlight effects */
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
@@ -14,6 +16,7 @@
   animation: shimmer 2s infinite linear;
 }
 
+/* Fade-in animation for smooth element appearance */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -23,28 +26,40 @@
   animation: fadeIn 1s ease-out forwards;
 }
 
+/* Fade-in-down animation for elements entering from above
+  (add transform for downward movement if needed) */
 .animate-fade-in-down {
-    animation: fadeIn 1s ease-out forwards;
-    /* İstersen aşağıdan gelme efekti için transform ekleyebilirsin */
+  animation: fadeIn 1s ease-out forwards;
+  /* Optionally add: transform: translateY(-20px); for downward motion */
 }
-/* Cyberpunk Izgara Arka Planı */
+
+/* ==========================================================================
+  Background Effects
+  ========================================================================== */
+
+/* Grid pattern background for cyberpunk or technical UI themes */
 .bg-grid-pattern {
   background-size: 50px 50px;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+   linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+   linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }
 
-/* Köşeleri Karartma (Vignette) */
+/* Vignette effect for darkened corners and visual focus */
 .bg-vignette {
   background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.6) 100%);
 }
 
-/* Yanıp sönen imleç efekti */
+/* ==========================================================================
+  Cursor and Blinking Effects
+  ========================================================================== */
+
+/* Blinking animation for cursor or attention-grabbing elements */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
+
 .animate-blink {
   animation: blink 1s step-end infinite;
 }

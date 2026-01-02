@@ -1,13 +1,22 @@
-// components/merky/IntroScreen.tsx
 import React from 'react';
 import Image from 'next/image';
 
+/**
+ * IntroScreen
+ * -----------
+ * Displays an animated introduction screen with branding, atmospheric effects,
+ * and a live session indicator. Uses custom CSS animations for visual polish.
+ */
 const IntroScreen: React.FC = () => {
   return (
     <>
-      {/* --- ÖZEL ANIMASYON TANIMLARI --- */}
+      {/* 
+        ===========================
+        Global Animation Definitions
+        ===========================
+        Defines keyframes and utility classes for custom animation effects.
+      */}
       <style jsx global>{`
-        /* Mevcut animasyonlar... */
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
@@ -17,7 +26,6 @@ const IntroScreen: React.FC = () => {
           50% { height: 100%; opacity: 1; }
         }
         @keyframes breathe {
-          /* DEĞİŞİKLİK: Işıkların nefes alma opaklığını düşürdüm (Daha karanlık) */
           0%, 100% { opacity: 0.15; transform: scale(1); }
           50% { opacity: 0.3; transform: scale(1.2); }
         }
@@ -40,7 +48,6 @@ const IntroScreen: React.FC = () => {
           100% { left: 200%; opacity: 0; }
         }
 
-        /* Class atamaları */
         .shimmer-effect { position: relative; overflow: hidden; display: inline-block; }
         .shimmer-effect::after {
           content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
@@ -57,36 +64,63 @@ const IntroScreen: React.FC = () => {
         .animate-reveal { animation: reveal-up 1s ease-out forwards 0.5s; opacity: 0; }
       `}</style>
 
-      {/* DEĞİŞİKLİK: bg-[#080808] yerine 'bg-black' (Tam Siyah) */}
+      {/* 
+        ===========================
+        UI Layers & Visual Effects
+        ===========================
+        - Background color and typography
+        - Atmospheric blurred lights
+        - Noise overlay for texture
+        - Vignette for edge darkening
+      */}
       <div className="relative w-full h-full flex flex-col items-center justify-center bg-black text-white overflow-hidden font-sans selection:bg-orange-500/30">
         
-        {/* --- ATMOSFERİK ARKA PLAN --- */}
-        {/* DEĞİŞİKLİK: opacity-20 yerine 'opacity-10' yapıldı. Işıklar artık daha loş. */}
+        {/* Atmospheric blurred blue light (top left) */}
         <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#5865F2] rounded-full blur-[180px] opacity-10 pointer-events-none animate-breathe"></div>
+        {/* Atmospheric blurred orange light (bottom right) */}
         <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-orange-600 rounded-full blur-[180px] opacity-10 pointer-events-none animate-breathe" style={{ animationDelay: '4s' }}></div>
         
-        {/* Noise Texture - Opaklığı korundu, siyah üzerinde daha iyi durur */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
+        {/* Noise texture overlay for subtle grain effect */}
+        <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+          }}
+        ></div>
 
-        {/* --- VIGNETTE (Kenarları Karartma) --- */}
-        {/* YENİ EKLENDİ: Ekranın köşelerini tamamen karartmak için ekstra bir katman */}
+        {/* Vignette overlay for edge darkening */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_100%)] pointer-events-none"></div>
 
-        {/* --- ANA İÇERİK --- */}
+        {/* 
+          ===========================
+          Main Content
+          ===========================
+          Contains branding, animated icons, and session info.
+        */}
         <div className="relative z-10 flex flex-col items-center justify-center gap-10 md:gap-16">
             
-            {/* ÜST ETİKET */}
-            <div className="flex items-center gap-3 border border-white/5 bg-white/5 px-6 py-2 rounded-full shadow-lg backdrop-blur-md animate-reveal" style={{ animationDelay: '0.2s' }}>
+            {/* Live session indicator badge */}
+            <div
+              className="flex items-center gap-3 border border-white/5 bg-white/5 px-6 py-2 rounded-full shadow-lg backdrop-blur-md animate-reveal"
+              style={{ animationDelay: '0.2s' }}
+            >
               <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]"></div>
               <span className="text-xs md:text-sm font-medium tracking-[0.3em] text-white/90 uppercase">
                 Live Session
               </span>
             </div>
 
-            {/* ORTA BÖLÜM: LOGOLAR */}
+            {/* 
+              ===========================
+              Animated Branding Row
+              ===========================
+              - Discord logo (left)
+              - Animated equalizer (center)
+              - Merky avatar (right)
+            */}
             <div className="flex items-center justify-center gap-8 md:gap-16 scale-110 md:scale-125">
                 
-                {/* 1. SOL TARAF: DISCORD */}
+                {/* Discord logo with floating animation */}
                 <div className="flex flex-col items-center gap-4 group cursor-default animate-slide-left">
                    <div className="w-24 h-24 md:w-36 md:h-36 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 animate-float">
                       <svg viewBox="0 0 127 96" className="w-20 h-20 md:w-28 md:h-28 fill-[#5865F2] drop-shadow-[0_0_40px_rgba(88,101,242,0.5)]">
@@ -96,7 +130,7 @@ const IntroScreen: React.FC = () => {
                    <span className="text-xs uppercase tracking-widest text-gray-500 font-bold animate-reveal" style={{ animationDelay: '1s' }}>DISCORD</span>
                 </div>
 
-                {/* 2. ORTA: EQUALIZER */}
+                {/* Animated equalizer bars (center) */}
                 <div className="flex gap-2 h-16 items-center opacity-90 mx-2 animate-reveal" style={{ animationDelay: '0.5s' }}>
                    <div className="w-1.5 bg-gradient-to-t from-gray-800 to-gray-500 rounded-full h-full" style={{ animation: 'music-bar 0.8s ease-in-out infinite' }}></div>
                    <div className="w-1.5 bg-gradient-to-t from-gray-800 to-white rounded-full h-[60%]" style={{ animation: 'music-bar 1.2s ease-in-out infinite 0.1s' }}></div>
@@ -105,7 +139,7 @@ const IntroScreen: React.FC = () => {
                    <div className="w-1.5 bg-gradient-to-t from-gray-800 to-gray-500 rounded-full h-full" style={{ animation: 'music-bar 0.7s ease-in-out infinite 0.4s' }}></div>
                 </div>
 
-                {/* 3. SAĞ TARAF: MERKY */}
+                {/* Merky avatar with floating animation */}
                 <div className="flex flex-col items-center gap-4 group cursor-default animate-slide-right">
                    <div className="relative w-24 h-24 md:w-36 md:h-36 transition-transform duration-500 group-hover:scale-110 animate-float-delayed">
                       <Image 
@@ -121,7 +155,13 @@ const IntroScreen: React.FC = () => {
 
             </div>
 
-            {/* ALT METİN */}
+            {/* 
+              ===========================
+              Title and Attribution
+              ===========================
+              - Main title with shimmer animation
+              - Attribution text
+            */}
             <div className="flex flex-col items-center gap-2 text-center mt-4 animate-reveal" style={{ animationDelay: '1.2s' }}>
                <h1 className="text-4xl md:text-5xl font-light text-white tracking-tight drop-shadow-2xl">
                  <span className="shimmer-effect">
