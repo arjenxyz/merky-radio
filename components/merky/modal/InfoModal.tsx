@@ -86,7 +86,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
                      </div>
                 </div>
 
-                {/* --- DEĞİŞEN KISIM: PROJE TANITIMI --- */}
+               
                 <div className="p-4 rounded-xl bg-[#181818] border border-[#222] space-y-3">
                     <div className="flex items-center gap-2 mb-2">
                         <FaHeart className="text-[#FF7626] text-xs" />
