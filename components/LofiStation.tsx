@@ -151,8 +151,6 @@ export default function LofiStation() {
       } catch (error) {
         console.error('Data Fetch Error:', error);
       } finally {
-        // --- YAPAY GECİKME (ARTIFICIAL DELAY) ---
-        // Veri gelse bile 2.5 saniye bekle (Senin istediğin özellik)
         if (isMounted) {
             setTimeout(() => {
                setIsLoading(false);
