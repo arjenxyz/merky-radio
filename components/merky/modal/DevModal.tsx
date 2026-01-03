@@ -65,16 +65,11 @@ const DevModal: React.FC<DevModalProps> = ({ isOpen, onClose }) => {
             
             {/* Identity Section */}
             <div className="flex items-center gap-5">
-                {/* AVATAR GÜNCELLEMESİ: 
-                   1. w-24 h-24 (96px) yaparak büyüttük.
-                   2. padding'i sildik.
-                   3. overflow-hidden ile köşeleri yuvarladık.
-                */}
                 <div className="relative w-24 h-24 shrink-0 bg-[#0a0a0a] rounded-2xl border border-[#333] overflow-hidden group shadow-lg">
                     <Image 
                         src="/intro-avatar/arjen.jpeg" 
                         alt="Arjen" 
-                        fill // Kutuya tam oturmasını sağlar (width/height vermeye gerek yok)
+                        fill 
                         quality={100}
                         priority
                         className="object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
